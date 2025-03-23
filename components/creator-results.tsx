@@ -1,98 +1,97 @@
-import { getCreatorInfluence } from "@/lib/influence-analyzer"
-import type { InfluenceScore } from "@/lib/types"
-import InfluenceScoreCard from "./influence-score-card"
-import InfluenceMetrics from "./influence-metrics"
-import InfluenceDetails from "./influence-details"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
-import { AlertCircle } from "lucide-react"
-import { getStoredCreatorInfluence } from "@/lib/db-service"
-import { extractChannelIdFromUrl } from "@/lib/utils"
+"use client";
 
-export default async function CreatorResults({ query }: { query: string }) {
-  try {
-    // First try to get the channel ID
-    const channelId = await extractChannelIdFromUrl(query)
+import { useState, useEffect } from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { AlertCircle, Loader2 } from "lucide-react";
+import InfluenceScoreCard from "./influence-score-card";
+import InfluenceMetrics from "./influence-metrics";
+import InfluenceDetails from "./influence-details";
+import type { InfluenceScore } from "@/lib/types";
 
-    if (!channelId) {
-      return (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertTitle>Error</AlertTitle>
-          <AlertDescription>
-            Unable to identify a YouTube channel from the provided URL. Please check the URL and try again.
-          </AlertDescription>
-        </Alert>
-      )
-    }
+export default function CreatorResults({ query }: { query: string }) {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [influenceData, setInfluenceData] = useState<InfluenceScore | null>(null);
 
-    // Try to get cached data first
-    let influenceData = await getStoredCreatorInfluence(channelId)
-
-    // If no cached data or it's stale, analyze the channel
-    if (!influenceData || !isDataFresh(influenceData.updatedAt)) {
+  useEffect(() => {
+    async function fetchData() {
       try {
-        influenceData = await getCreatorInfluence(query)
-      } catch (error) {
-        console.error("Error analyzing channel:", error)
-
-        // If we have stale data, use it as fallback
-        if (influenceData) {
-          return (
-            <>
-              <Alert variant="default" className="mb-6">
-                <AlertCircle className="h-4 w-4" />
-                <AlertTitle>Using cached data</AlertTitle>
-                <AlertDescription>
-                  We couldn't refresh the analysis due to API limits. Showing the last available data from{" "}
-                  {new Date(influenceData.updatedAt).toLocaleDateString()}.
-                </AlertDescription>
-              </Alert>
-
-              <CreatorResultsContent influenceData={influenceData} />
-            </>
-          )
+        setLoading(true);
+        setError(null);
+        
+        // Make a POST request to your existing API endpoint
+        const response = await fetch('/api/analyze', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ url: query }),
+        });
+        
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Failed to analyze channel');
         }
-
-        return (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>API Limit Reached</AlertTitle>
-            <AlertDescription>We've reached the API rate limit. Please try again later.</AlertDescription>
-          </Alert>
-        )
-      }
-
-      if (!influenceData) {
-        return (
-          <Alert variant="destructive">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>Error</AlertTitle>
-            <AlertDescription>
-              Unable to analyze this YouTube channel. Please check the URL and try again.
-            </AlertDescription>
-          </Alert>
-        )
+        
+        const data = await response.json();
+        setInfluenceData(data);
+        
+        // Notify the search form that results are loaded
+        window.dispatchEvent(new Event('resultsLoaded'));
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'An error occurred');
+        console.error("Error analyzing channel:", err);
+      } finally {
+        setLoading(false);
       }
     }
 
-    return <CreatorResultsContent influenceData={influenceData} />
-  } catch (error) {
+    if (query) {
+      fetchData();
+    }
+  }, [query]);
+
+  if (loading) {
+    return (
+      <div className="flex flex-col justify-center items-center py-20">
+        <Loader2 className="h-8 w-8 animate-spin text-primary mb-4" />
+        <span className="text-lg text-center">Analyzing creator influence...</span>
+        <p className="text-sm text-muted-foreground text-center mt-2">
+          This may take a moment as we gather data from multiple sources.
+        </p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Alert variant="destructive">
+        <AlertCircle className="h-4 w-4" />
+        <AlertTitle>Error</AlertTitle>
+        <AlertDescription>{error}</AlertDescription>
+      </Alert>
+    );
+  }
+
+  if (!influenceData) {
     return (
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertTitle>Error</AlertTitle>
         <AlertDescription>
-          {error instanceof Error ? error.message : "An error occurred while analyzing the creator."}
+          Unable to analyze this YouTube channel. Please check the URL and try again.
         </AlertDescription>
       </Alert>
-    )
+    );
   }
+
+  return <CreatorResultsContent influenceData={influenceData} />;
 }
 
 function CreatorResultsContent({ influenceData }: { influenceData: InfluenceScore }) {
   // Check if content has low appropriateness score (potentially 18+ or harmful)
-  const appropriatenessMetric = influenceData.metrics.find((m) => m.type === "appropriateness")
-  const hasInappropriateContent = appropriatenessMetric && appropriatenessMetric.score < 50
+  const appropriatenessMetric = influenceData.metrics.find((m) => m.type === "appropriateness");
+  const hasInappropriateContent = appropriatenessMetric && appropriatenessMetric.score < 50;
 
   return (
     <div className="space-y-8">
@@ -113,9 +112,8 @@ function CreatorResultsContent({ influenceData }: { influenceData: InfluenceScor
 
       <InfluenceDetails influenceData={influenceData} />
     </div>
-  )
+  );
 }
-
 // Helper function to check if data is fresh (less than 24 hours old)
 function isDataFresh(updatedAt: string): boolean {
   const lastUpdate = new Date(updatedAt).getTime()
