@@ -1,9 +1,12 @@
-let userConfig = {}; // Ensure userConfig is always defined
+// Ensure userConfig is always defined
+let userConfig = {};
 
-try {
-  userConfig = await import('./v0-user-next.config.mjs'); // Explicitly add .mjs extension
-} catch (e) {
-  console.warn("No user config found, using default Next.js config."); // Debugging info
+async function loadUserConfig() {
+  try {
+    userConfig = await import('./v0-user-next.config.mjs').then((mod) => mod.default);
+  } catch (e) {
+    console.warn("No user config found, using default Next.js config.");
+  }
 }
 
 /** @type {import('next').NextConfig} */
@@ -25,22 +28,26 @@ const nextConfig = {
   },
 };
 
-mergeConfig(nextConfig, userConfig); // userConfig is now always defined
-
-function mergeConfig(nextConfig, userConfig) {
-  if (!userConfig) return;
+// Function to merge user config
+function mergeConfig(baseConfig, userConfig) {
+  if (!userConfig) return baseConfig;
 
   for (const key in userConfig) {
-    if (typeof nextConfig[key] === "object" && !Array.isArray(nextConfig[key])) {
-      nextConfig[key] = {
-        ...nextConfig[key],
+    if (typeof baseConfig[key] === "object" && !Array.isArray(baseConfig[key])) {
+      baseConfig[key] = {
+        ...baseConfig[key],
         ...userConfig[key],
       };
     } else {
-      nextConfig[key] = userConfig[key];
+      baseConfig[key] = userConfig[key];
     }
   }
+
+  return baseConfig;
 }
 
-export { nextConfig };
-;
+// Load user config before exporting
+await loadUserConfig();
+const finalConfig = mergeConfig(nextConfig, userConfig);
+
+export default finalConfig;
