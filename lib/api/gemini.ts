@@ -195,22 +195,24 @@ function countEducationalTerms(comments: string[]): number {
 }
 
 function countInappropriateTerms(comments: string[]): number {
-  // More comprehensive pattern for truly inappropriate content
-  const inappropriatePattern = /(roaster| comedian| 18+|vulgar|pornographic|explicit content|nsfw|sexually explicit|obscene|porn|hardcore|x-rated|xxx|adult film|nude|naked|erotic|masturbat|f[*u]ck(?!ing amazing)|sh[*i]t(?!ting amazing)|d[*i]ck|p[*u]ssy|c[*u]nt|b[*i]tch|slut|whore|kill yourself|suicide|murder|rape|molest|pedophil|child abuse|racial slur|n[*-]word|nazi|white supremac|hate speech|antisemit|gore|violence|self harm|bhojpuri|भोजपुरी)/gi;
+  // More focused pattern for truly inappropriate content
+  const inappropriatePattern = /(\bporn\b|\bxxx\b|obscene|explicit adult|hardcore|x-rated|nude|naked|erotic|\bmasturbat|\bf[*u]ck(?!ing amazing)|\bsh[*i]t(?!ting)|\bd[*i]ck\b|\bp[*u]ssy\b|\bc[*u]nt\b|\bslut\b|\bwhore\b|kill yourself|suicide instruction|racial slur|\bn[*-]word\b|antisemit|gore|self harm|comedian|भोजपुरी|comedy| Kallu)/gi;
   
-  // Context-aware filtering - don't count terms in educational contexts
+  // Excluded terms that were causing false positives
+  const excludedContextPattern = /(\bcoding\b|\bprogramming\b|\btutorial\b|\btech\b|\blearning\b|\beducational\b|\bjavascript\b|\bhtml\b|\bcss\b|\bweb dev\b|\bsoftware\b|\breact\b|\bangular\b|\bnode\b|\bpython\b)/i;
+  
   let count = 0;
   
   for (const comment of comments) {
-    // Skip comments that appear to be in educational context
-    const isEducationalContext = /(learn|study|education|course|class|school|college|university|lecture|professor|teaching|academic|research|science|analysis|history lesson|educational|informative)/i.test(comment);
+    // Skip comments in educational or tech context
+    if (excludedContextPattern.test(comment)) {
+      continue;
+    }
     
-    // If not in educational context, count inappropriate terms
-    if (!isEducationalContext) {
-      const matches = comment.match(inappropriatePattern);
-      if (matches) {
-        count += matches.length;
-      }
+    // Count truly inappropriate terms
+    const matches = comment.match(inappropriatePattern);
+    if (matches) {
+      count += matches.length;
     }
   }
   
