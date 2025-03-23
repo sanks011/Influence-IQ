@@ -12,7 +12,7 @@ const inter = Inter({ subsets: ["latin"] })
 export const metadata = {
   title: "InfluenceIQ - YouTube Creator Influence Analysis",
   description: "Analyze YouTube creators based on credibility, influence, and engagement",
-    generator: 'v0.dev'
+  generator: 'Sankalpa & Sahnik'
 }
 
 export default function RootLayout({
@@ -31,15 +31,19 @@ export default function RootLayout({
                   <BarChart3 className="h-6 w-6 text-primary mr-2" />
                   <span className="font-bold text-xl">InfluenceIQ</span>
                 </Link>
-                <nav className="hidden md:block">
-                  <div className="flex items-center gap-4">
-                    <Link href="/dashboard">
-                      <Button variant="ghost">Dashboard</Button>
-                    </Link>
-                    <Link href="/top-creators">
-                      <Button variant="ghost">Top Creators</Button>
-                    </Link>
-                  </div>
+                <nav className="hidden md:flex items-center gap-4">
+                  <Link href="/">
+                    <Button variant="ghost">Home</Button>
+                  </Link>
+                  <Link href="/analyze">
+                    <Button variant="ghost">Analyzer</Button>
+                  </Link>
+                  <Link href="/dashboard">
+                    <Button variant="ghost">Dashboard</Button>
+                  </Link>
+                  <Link href="/top-creators">
+                    <Button variant="ghost">Top Creators</Button>
+                  </Link>
                 </nav>
                 <MobileNav />
               </div>
@@ -57,7 +61,3 @@ export default function RootLayout({
     </html>
   )
 }
-
-
-
-import './globals.css'
