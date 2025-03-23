@@ -9,7 +9,12 @@ const nextConfig = {
   },
   images: {
     unoptimized: true,
-    domains: ['yt3.ggpht.com'], // Allow YouTube images
+    domains: [
+      'yt3.ggpht.com',    // YouTube channel thumbnails
+      'i.ytimg.com',      // YouTube video thumbnails
+      'img.youtube.com',  // YouTube other thumbnails
+      'yt3.googleusercontent.com'  // YouTube new thumbnail domain
+    ],
   },
   experimental: {
     webpackBuildWorker: true,

@@ -64,4 +64,3 @@ function isDataFresh(updatedAt: string): boolean {
 
   return hoursDiff < 24
 }
-
