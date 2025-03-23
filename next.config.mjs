@@ -1,6 +1,14 @@
+let userConfig = {}; // Ensure userConfig is always defined
+
+try {
+  userConfig = await import('./v0-user-next.config.mjs'); // Explicitly add .mjs extension
+} catch (e) {
+  console.warn("No user config found, using default Next.js config."); // Debugging info
+}
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  output: 'standalone', // 👈 This ensures that Next.js runs as a standalone app
+  output: 'standalone', // Needed for Render
   eslint: {
     ignoreDuringBuilds: true,
   },
@@ -15,28 +23,23 @@ const nextConfig = {
     parallelServerBuildTraces: true,
     parallelServerCompiles: true,
   },
-}
+};
 
-mergeConfig(nextConfig, userConfig)
+mergeConfig(nextConfig, userConfig); // userConfig is now always defined
 
 function mergeConfig(nextConfig, userConfig) {
-  if (!userConfig) {
-    return
-  }
+  if (!userConfig) return;
 
   for (const key in userConfig) {
-    if (
-      typeof nextConfig[key] === 'object' &&
-      !Array.isArray(nextConfig[key])
-    ) {
+    if (typeof nextConfig[key] === "object" && !Array.isArray(nextConfig[key])) {
       nextConfig[key] = {
         ...nextConfig[key],
         ...userConfig[key],
-      }
+      };
     } else {
-      nextConfig[key] = userConfig[key]
+      nextConfig[key] = userConfig[key];
     }
   }
 }
 
-export default nextConfig
+export default nextConfig;
