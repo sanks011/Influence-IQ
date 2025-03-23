@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState,useEffect } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import type { InfluenceMetric } from "@/lib/types"
@@ -47,7 +47,11 @@ export default function InfluenceMetrics({ metrics }: InfluenceMetricsProps) {
         return <BarChart3 className="h-5 w-5" />
     }
   }
-
+// In the results component, add this when results are fully loaded
+useEffect(() => {
+  // Dispatch the custom event when results are loaded
+  window.dispatchEvent(new Event('resultsLoaded'))
+}, [])
   return (
     <Card className="h-full">
       <CardHeader>

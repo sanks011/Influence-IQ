@@ -1,7 +1,7 @@
 "use client"
 
 import type React from "react"
-import { useState, useRef, useEffect } from "react"
+import { useState, useRef, useEffect, useCallback } from "react"
 import { useRouter, useSearchParams } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -16,11 +16,37 @@ export default function SearchForm({ initialQuery = "" }: { initialQuery?: strin
   const [showLoadingDialog, setShowLoadingDialog] = useState(false)
   const [progress, setProgress] = useState(0)
   const progressIntervalRef = useRef<NodeJS.Timeout | null>(null)
+  const loadingStartTimeRef = useRef<number | null>(null)
   const router = useRouter()
   const searchParams = useSearchParams()
   const { toast } = useToast()
   const isInitialMount = useRef(true)
   const currentQueryRef = useRef<string | null>(null)
+  const MINIMUM_LOADING_TIME = 4000 // Minimum time in ms to show the loading dialog
+
+  // Function to finish the analysis and close the dialog
+  const completeAnalysis = useCallback(() => {
+    if (!isLoading) return
+    
+    const currentTime = Date.now()
+    const loadingTime = loadingStartTimeRef.current ? currentTime - loadingStartTimeRef.current : 0
+    
+    // Fast transition to 100%
+    setProgress(100)
+    stopProgressSimulation()
+    
+    // Calculate remaining time to meet minimum display duration
+    const remainingTime = Math.max(0, MINIMUM_LOADING_TIME - loadingTime)
+    
+    setTimeout(() => {
+      setIsLoading(false)
+      setShowLoadingDialog(false)
+      
+      // Reset the current query reference
+      currentQueryRef.current = null
+      loadingStartTimeRef.current = null
+    }, remainingTime)
+  }, [isLoading])
 
   // Reset loading state when the URL query parameter changes
   useEffect(() => {
@@ -33,22 +59,45 @@ export default function SearchForm({ initialQuery = "" }: { initialQuery?: strin
       return
     }
 
-    // If the URL query has changed from what we submitted, analysis is complete
-    if (urlQuery !== null && urlQuery === currentQueryRef.current) {
-      setIsLoading(false)
-      setShowLoadingDialog(false)
-      stopProgressSimulation()
-
-      // Reset the current query reference
-      currentQueryRef.current = null
+    // If we have a query parameter and we're in loading state, we can assume
+    // the page has navigated and results are being rendered in the background
+    if (urlQuery !== null && isLoading) {
+      // Handle edge case where query might be different than what we submitted
+      if (urlQuery !== currentQueryRef.current) {
+        currentQueryRef.current = urlQuery
+      }
+      
+      // Allow a brief moment for the results to render
+      setTimeout(() => {
+        completeAnalysis()
+      }, 1000) // Give the results page a moment to load
     }
-  }, [searchParams])
+  }, [searchParams, isLoading, completeAnalysis])
+
+  // Create a custom event listener to detect when results are fully loaded
+  useEffect(() => {
+    const handleResultsLoaded = () => {
+      if (isLoading) {
+        completeAnalysis()
+      }
+    }
+
+    // Listen for a custom event from the results component
+    window.addEventListener('resultsLoaded', handleResultsLoaded)
+    
+    return () => {
+      window.removeEventListener('resultsLoaded', handleResultsLoaded)
+    }
+  }, [isLoading, completeAnalysis])
 
   const startProgressSimulation = () => {
+    // Record start time
+    loadingStartTimeRef.current = Date.now()
+    
     // Reset progress
     setProgress(0)
 
-    // Simulate progress with non-linear increments to feel more realistic
+    // Faster progress simulation with larger increments
     progressIntervalRef.current = setInterval(() => {
       setProgress((prev) => {
         if (prev >= 95) {
@@ -56,14 +105,14 @@ export default function SearchForm({ initialQuery = "" }: { initialQuery?: strin
           return prev
         }
 
-        // Slow down as we get closer to 100%
-        if (prev < 30) return prev + 5
-        if (prev < 60) return prev + 3
-        if (prev < 80) return prev + 1.5
-        if (prev < 90) return prev + 0.5
-        return prev + 0.2
+        // Faster progression with larger steps
+        if (prev < 30) return prev + 10
+        if (prev < 60) return prev + 7
+        if (prev < 80) return prev + 3
+        if (prev < 90) return prev + 1
+        return prev + 0.5
       })
-    }, 150)
+    }, 100) // Decreased interval time for faster updates
   }
 
   const stopProgressSimulation = () => {
@@ -100,10 +149,18 @@ export default function SearchForm({ initialQuery = "" }: { initialQuery?: strin
       const encodedQuery = encodeURIComponent(query.trim())
       currentQueryRef.current = encodedQuery
 
+      // Set a fallback timeout in case other detection methods fail
+      const fallbackTimeout = setTimeout(() => {
+        if (isLoading) {
+          completeAnalysis()
+        }
+      }, 15000) // 15 seconds max loading time
+
       // Redirect to the results page
       router.push(`/?query=${encodedQuery}`)
 
-      // The loading state will be cleared when the URL changes and the useEffect runs
+      // Cleanup fallback timeout on next render
+      return () => clearTimeout(fallbackTimeout)
     } catch (error) {
       console.error("Error analyzing channel:", error)
       toast({
@@ -226,4 +283,3 @@ export default function SearchForm({ initialQuery = "" }: { initialQuery?: strin
     </>
   )
 }
-

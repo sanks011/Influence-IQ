@@ -39,7 +39,7 @@ export default async function CreatorResults({ query }: { query: string }) {
         if (influenceData) {
           return (
             <>
-              <Alert variant="warning" className="mb-6">
+              <Alert variant="default" className="mb-6">
                 <AlertCircle className="h-4 w-4" />
                 <AlertTitle>Using cached data</AlertTitle>
                 <AlertDescription>
