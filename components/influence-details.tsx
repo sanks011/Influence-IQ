@@ -69,6 +69,8 @@ export default function InfluenceDetails({ influenceData }: InfluenceDetailsProp
     window.print()
   }
 
+  
+
   return (
     <Card className="relative">
       <CardHeader className="flex flex-row items-center justify-between">
