@@ -10,7 +10,13 @@ import { useToast } from "@/components/ui/use-toast"
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Progress } from "@/components/ui/progress"
 
-export default function SearchForm({ initialQuery = "" }: { initialQuery?: string }) {
+export default function SearchForm({ 
+  initialQuery = "", 
+  isAnalyzePage = false 
+}: { 
+  initialQuery?: string;
+  isAnalyzePage?: boolean;
+}) {
   const [query, setQuery] = useState(initialQuery)
   const [isLoading, setIsLoading] = useState(false)
   const [showLoadingDialog, setShowLoadingDialog] = useState(false)
@@ -156,8 +162,9 @@ export default function SearchForm({ initialQuery = "" }: { initialQuery?: strin
         }
       }, 15000) // 15 seconds max loading time
 
-      // Redirect to the results page
-      router.push(`/?query=${encodedQuery}`)
+      // Important change: Use the correct route based on whether we're on the analyze page
+      const targetPath = isAnalyzePage ? `/analyze?query=${encodedQuery}` : `/?query=${encodedQuery}`
+      router.push(targetPath)
 
       // Cleanup fallback timeout on next render
       return () => clearTimeout(fallbackTimeout)
@@ -182,7 +189,11 @@ export default function SearchForm({ initialQuery = "" }: { initialQuery?: strin
     // If we're already on a results page, stay there
     // If not, go to home
     if (!initialQuery) {
-      router.push("/")
+      if (isAnalyzePage) {
+        router.push("/analyze")
+      } else {
+        router.push("/")
+      }
     }
 
     toast({
