@@ -4,7 +4,7 @@ import { Inter } from "next/font/google"
 import { Providers } from "@/components/providers"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { BarChart3 } from "lucide-react"
+import { BarChart3, TrendingUp } from "lucide-react"
 import { MobileNav } from "@/components/mobile-nav"
 
 const inter = Inter({ subsets: ["latin"] })
@@ -28,8 +28,10 @@ export default function RootLayout({
             <header className="border-b">
               <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                 <Link href="/" className="flex items-center">
-                  <BarChart3 className="h-6 w-6 text-black mr-2" />
-                  <span className="font-bold text-xl">InfluenceIQ</span>
+                <div className="bg-black p-2 rounded-full">
+                  <TrendingUp className="h-5 w-5 text-white" />
+                </div>
+                <span className="font-bold text-xl ml-2">InfluenceIQ</span>
                 </Link>
                 <nav className="hidden md:flex items-center gap-4">
                   <Link href="/">
