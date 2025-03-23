@@ -28,29 +28,29 @@ export default function RootLayout({
             <header className="border-b">
               <div className="container mx-auto px-4 py-3 flex justify-between items-center">
                 <Link href="/" className="flex items-center">
-                  <BarChart3 className="h-6 w-6 text-primary mr-2" />
+                  <BarChart3 className="h-6 w-6 text-black mr-2" />
                   <span className="font-bold text-xl">InfluenceIQ</span>
                 </Link>
                 <nav className="hidden md:flex items-center gap-4">
                   <Link href="/">
-                    <Button variant="ghost">Home</Button>
+                    <Button variant="ghost" className="hover:bg-gray-100 text-black hover:text-black">Home</Button>
                   </Link>
                   <Link href="/analyze">
-                    <Button variant="ghost">Analyzer</Button>
+                    <Button variant="ghost" className="hover:bg-gray-100 text-black hover:text-black">Analyzer</Button>
                   </Link>
                   <Link href="/dashboard">
-                    <Button variant="ghost">Dashboard</Button>
+                    <Button variant="ghost" className="hover:bg-gray-100 text-black hover:text-black">Dashboard</Button>
                   </Link>
                   <Link href="/top-creators">
-                    <Button variant="ghost">Top Creators</Button>
+                    <Button variant="ghost" className="hover:bg-gray-100 text-black hover:text-black">Top Creators</Button>
                   </Link>
                 </nav>
                 <MobileNav />
               </div>
             </header>
             <main className="flex-1">{children}</main>
-            <footer className="border-t py-6">
-              <div className="container mx-auto px-4 text-center text-sm text-muted-foreground">
+            <footer className="border-t py-6 bg-gray-50">
+              <div className="container mx-auto px-4 text-center text-sm text-gray-600">
                 <p>InfluenceIQ - YouTube Creator Influence Analysis</p>
                 <p className="mt-1">Built with Next.js and Firebase</p>
               </div>
