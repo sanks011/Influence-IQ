@@ -50,4 +50,8 @@ function mergeConfig(baseConfig, userConfig) {
 await loadUserConfig();
 const finalConfig = mergeConfig(nextConfig, userConfig);
 
-export default finalConfig;
+export default {
+  experimental: {
+    serverActions: {}, // Ensure it's an object, not a boolean
+  }
+};
