@@ -76,69 +76,84 @@ export async function analyzeWithGemini(channelData: ChannelData): Promise<Gemin
       News Articles Found: ${channelData.newsArticles.length}
       ${channelData.newsArticles.length > 0 ? "Sample News Headlines:" : ""}
       ${channelData.newsArticles
-        .slice(0, 5)
-        .map((article) => `- "${article.title}" (${article.source})`)
-        .join("\n")}
+      .slice(0, 5)
+      .map((article) => `- "${article.title}" (${article.source})`)
+      .join("\n")}
       
       AUDIENCE ENGAGEMENT:
       Reddit Posts Found: ${channelData.redditPosts.length}
       ${channelData.redditPosts.length > 0 ? "Sample Reddit Discussions:" : ""}
       ${channelData.redditPosts
-        .slice(0, 5)
-        .map((post) => `- "${post.title}" (${post.subreddit}, Score: ${post.score}, Comments: ${post.commentCount})`)
-        .join("\n")}
+      .slice(0, 5)
+      .map((post) => `- "${post.title}" (${post.subreddit}, Score: ${post.score}, Comments: ${post.commentCount})`)
+      .join("\n")}
       
       AUDIENCE SENTIMENT:
       Positive Comments: ${channelData.sentimentAnalysis.positive.toFixed(1)}%
       Negative Comments: ${channelData.sentimentAnalysis.negative.toFixed(1)}%
       Neutral Comments: ${channelData.sentimentAnalysis.neutral.toFixed(1)}%
       
+      EDUCATION AND INAPPROPRIATE CONTENT ANALYSIS:
+      Educational Terms Found: ${channelData.comments.join(' ').toLowerCase().match(/(learn|educational|informative|taught|study|knowledge|science|math|physics|chemistry|biology|history|literature|academic|research|professor|teacher|lecture|curriculum|education|university|college|school|classroom|student|scholar|learning|teaching|tutor|lesson|course|workshop|training|expert|phd|master|degree|artificial intelligence|machine learning|deep learning|neural network|ai|quantum computing|quantum mechanics|quantum physics|robotics|data science|computer science|algorithm|programming|coding|software|hardware|technology|engineering|mathematics|statistics|probability|calculus|algebra|geometry|theoretical physics|astrophysics|astronomy|aerospace|cybersecurity|blockchain|cryptography|bioinformatics|neuroscience|cognitive science|psychology|linguistics|philosophy|logic|reasoning|critical thinking)/g)?.length || 0}
+      Inappropriate Terms Found: ${channelData.comments.join(' ').toLowerCase().match(/(vulgar|inappropriate|adult|nsfw|offensive|explicit|porn|sex|fuck|shit|dick|ass|bitch|gandu|bhenchod|chutiya|madarchod|bhosdike|randi|aashiq|lawda|lund|chut|bahinchod|bc|mc|gaali|ashleel|nangi|sexy|nanga|suicide|abuse|rape|harassment|violence|hate|racist|discrimination|kamina|harami|bewakoof|pagal|buddhu|ullu|chutiyo|kutta|kutti|saala|sali|maderchod|behenchod|bakrichod|kutiya|thopu|dhakkan|gadha|bakland|chodu|chutmarike|jhatu|chutad|bhadwa|bhosda|chinaal|chudai|bkl|mkc|tmkc|bsdk|betichod|maachod|lavde|jhaat|hijra|chakka|randwa|bhosadike|gaandu|lodu|lauda|chudna|chudwana|raand|bawasir|tattu|choot|dalla|rand|randi|gashti|jaahil|gandmasti|kuttiya|kutti|paagal|chutiye|chodu|laudu|gadhe|andh|bevda|bevdi|chus|chusna|muth|gandu|gaand|jhaant)/g)?.length || 0}
+      
       SAMPLE COMMENTS (${Math.min(channelData.comments.length, 15)} of ${channelData.comments.length}):
       ${channelData.comments
-        .slice(0, 15)
-        .map((comment) => `- "${comment}"`)
-        .join("\n")}
+      .slice(0, 15)
+      .map((comment) => `- "${comment}"`)
+      .join("\n")}
       
       ANALYSIS INSTRUCTIONS:
-      1. Analyze all the data above to provide a comprehensive assessment with extreme sensitivity - truly excellent creators should score 95+ while problematic creators should score below 30.
+      1. Analyze all the data above with extreme sensitivity:
+       - Educational terms found should significantly boost scores (+5 points per term, up to +50)
+       - Each inappropriate term should heavily penalize scores (-10 points per term)
       2. Be objective and data-driven in your analysis.
-      3. CRITICAL: Base content quality assessment primarily on Wikipedia presence. If the creator has NO Wikipedia page, their content quality score MUST be reduced by at least 40 points.
-      4. Significantly deduct points for any indication of adult content (18+), excessive vulgarity, misinformation, or harmful content.
-      5. Consider the creator's niche and audience when evaluating their influence.
-      6. Provide specific, actionable recommendations for improvement.
+      3. CRITICAL: Base content quality assessment on:
+       - Wikipedia presence (-40 points if absent)
+       - Educational term frequency (major positive factor)
+       - Inappropriate term frequency (major negative factor)
+      4. Award significant bonus points for:
+       - High educational term count (+20 points to content quality)
+       - Academic/scientific terms (+15 points to content quality)
+       - Educational partnerships (+15 points to credibility)
+      5. Apply major penalties for:
+       - Each instance of inappropriate language (-10 points to appropriateness)
+       - Adult content references (-20 points per instance)
+       - Harmful content (-30 points to overall score per instance)
+      6. Consider the ratio of educational to inappropriate terms in final scoring.
+      7. Provide specific recommendations based on term analysis.
       
       RESPONSE FORMAT:
-      Provide your response in the following JSON format:
       {
-        "overallScore": number (0-100),
-        "metrics": {
-          "audienceSentiment": {
-            "score": number (0-100),
-            "description": "detailed explanation"
-          },
-          "contentQuality": {
-            "score": number (0-100, MUST be reduced by at least 40 points if no Wikipedia page exists),
-            "description": "detailed explanation focusing on Wikipedia presence and news coverage"
-          },
-          "credibility": {
-            "score": number (0-100),
-            "description": "detailed explanation"
-          },
-          "relevance": {
-            "score": number (0-100),
-            "description": "detailed explanation"
-          },
-          "appropriateness": {
-            "score": number (0-100, higher means more appropriate, deduct points for 18+ or harmful content)",
-            "description": "detailed explanation"
-          },
-          "engagement": {
-            "score": number (0-100)",
-            "description": "detailed explanation"
-          }
-        },
-        "analysis": "2-3 paragraph overall analysis",
-        "recommendations": ["recommendation1", "recommendation2", "recommendation3", "recommendation4"]
+      "overallScore": number (0-100),
+      "metrics": {
+      "audienceSentiment": {
+      "score": number (0-100),
+      "description": "detailed explanation including term analysis"
+      },
+      "contentQuality": {
+      "score": number (0-100),
+      "description": "detailed explanation with educational vs inappropriate term impact"
+      },
+      "credibility": {
+      "score": number (0-100),
+      "description": "detailed explanation"
+      },
+      "relevance": {
+      "score": number (0-100),
+      "description": "detailed explanation"
+      },
+      "appropriateness": {
+      "score": number (0-100),
+      "description": "detailed explanation with inappropriate term analysis"
+      },
+      "engagement": {
+      "score": number (0-100)",
+      "description": "detailed explanation"
+      }
+      },
+      "analysis": "2-3 paragraph overall analysis including term frequency impact",
+      "recommendations": ["recommendation1", "recommendation2", "recommendation3", "recommendation4"]
       }
       
       Ensure your JSON is valid and properly formatted.
@@ -234,99 +249,114 @@ function normalizeScore(score: number): number {
 
 // Generate fallback analysis when Gemini API fails
 function generateFallbackAnalysis(channelData: ChannelData): GeminiAnalysisResult {
-  // Calculate a basic sentiment score from the provided sentiment analysis with increased sensitivity
+  // Check comments for educational value, inappropriate content, and vulgar language
+  const comments = channelData.comments.join(' ').toLowerCase();
+  const hasEducationalMentions = comments.match(/(learn|educational|informative|taught|study|knowledge|science|math|physics|chemistry|biology|history|literature|academic|research|professor|teacher|lecture|curriculum|education|university|college|school|classroom|student|scholar|learning|teaching|tutor|lesson|course|workshop|training|expert|phd|master|degree|artificial intelligence|machine learning|deep learning|neural network|ai|quantum computing|quantum mechanics|quantum physics|robotics|data science|computer science|algorithm|programming|coding|software|hardware|technology|engineering|mathematics|statistics|probability|calculus|algebra|geometry|theoretical physics|astrophysics|astronomy|aerospace|cybersecurity|blockchain|cryptography|bioinformatics|neuroscience|cognitive science|psychology|linguistics|philosophy|logic|reasoning|critical thinking)/g)?.length || 0;
+  const hasInappropriateMentions = comments.match(/(vulgar|inappropriate|adult|nsfw|offensive|explicit|porn|sex|fuck|shit|dick|ass|bitch|gandu|bhenchod|chutiya|madarchod|bhosdike|randi|aashiq|lawda|lund|chut|bahinchod|bc|mc|gaali|ashleel|nangi|sexy|nanga|suicide|abuse|rape|harassment|violence|hate|racist|discrimination|kamina|harami|bewakoof|pagal|buddhu|ullu|chutiyo|kutta|kutti|saala|sali|maderchod|behenchod|bakrichod|kutiya|thopu|dhakkan|gadha|bakland|chodu|chutmarike|jhatu|chutad|bhadwa|bhosda|chinaal|chudai|bkl|mkc|tmkc|bsdk|betichod|maachod|lavde|jhaat|hijra|chakka|randwa|bhosadike|gaandu|lodu|lauda|chudna|chudwana|raand|bawasir|tattu|choot|dalla|rand|randi|gashti|jaahil|gandmasti|kuttiya|kutti|paagal|chutiye|chodu|laudu|gadhe|andh|bevda|bevdi|chus|chusna|muth|gandu|gaand|jhaant)/g)?.length || 0;
+
+  // Calculate sentiment score with extreme sensitivity
   const sentimentScore = Math.round(
-    50 + (channelData.sentimentAnalysis.positive - channelData.sentimentAnalysis.negative) * 0.9,
-  )
+    60 + (channelData.sentimentAnalysis.positive - channelData.sentimentAnalysis.negative) * 1.5,
+  );
 
-  // Calculate content quality based primarily on Wikipedia presence
-  // Start with a base score
-  let contentQualityScore = 70 // Higher base score for more sensitivity
-
-  // If no Wikipedia page, reduce by 40 points as requested
+  // Calculate content quality with extreme sensitivity
+  let contentQualityScore = 85; // Higher base score for excellent creators
+  
   if (!channelData.hasWikipedia) {
-    contentQualityScore -= 40 // Major reduction for no Wikipedia presence
+    contentQualityScore -= 40; // Mandatory reduction for no Wikipedia
   }
 
-  // Add points for news coverage with increased sensitivity
-  contentQualityScore += Math.min(channelData.newsArticles.length * 3, 30)
+  // Add bonus points for educational indicators
+  if (hasEducationalMentions >= 5) contentQualityScore += 50;
+  
+  // Add points for news coverage, especially academic partnerships
+  const academicNews = channelData.newsArticles.filter(a => 
+    a.title.toLowerCase().includes('university') || 
+    a.title.toLowerCase().includes('education') ||
+    a.title.toLowerCase().includes('research')
+  ).length;
+  contentQualityScore += Math.min(academicNews * 5, 15);
 
-  // Calculate credibility score with increased sensitivity
-  const hasWikipedia = channelData.hasWikipedia ? 60 : 0 // Increased impact
-  const newsScore = Math.min(channelData.newsArticles.length * 6, 35) // Increased impact
-  const credibilityScore = Math.min(hasWikipedia + newsScore + 5, 100) // Base 5 points
-
-  // Calculate engagement score with increased sensitivity
-  const redditScore = Math.min(channelData.redditPosts.length * 8, 60) // Increased impact
-  const commentScore = Math.min(channelData.comments.length * 1.5, 60) // Increased impact
-  const engagementScore = Math.round((redditScore + commentScore) / 2)
-
-  // Calculate relevance score with increased sensitivity
-  let relevanceScore = 40 // Lower base score for more sensitivity
-  if (channelData.hasWikipedia) {
-    relevanceScore += 30 // Increased boost for Wikipedia presence
-  }
-  if (channelData.newsArticles.length > 5) {
-    relevanceScore += 20
-  } else if (channelData.newsArticles.length > 0) {
-    relevanceScore += 10
-  }
-  if (channelData.redditPosts.length > 10) {
-    relevanceScore += 15
-  } else if (channelData.redditPosts.length > 0) {
-    relevanceScore += 10
+  // Calculate appropriateness score with penalties
+  let appropriatenessScore = 90; // Start high
+  if (hasInappropriateMentions > 0) {
+    appropriatenessScore -= Math.min(hasInappropriateMentions * 30, 60);
   }
 
-  // Default appropriateness score
-  const appropriatenessScore = 75
+  // Calculate credibility score
+  const hasWikipedia = channelData.hasWikipedia ? 70 : 20;
+  const newsScore = Math.min(channelData.newsArticles.length * 8, 30);
+  const credibilityScore = Math.min(hasWikipedia + newsScore, 100);
 
-  // Calculate overall score with increased sensitivity and higher weight to content quality and credibility
-  const overallScore = Math.round(
+  // Calculate engagement with extreme sensitivity
+  const redditEngagement = Math.min(channelData.redditPosts.reduce((sum, post) => sum + post.score, 0) / 100, 50);
+  const commentEngagement = Math.min(channelData.comments.length, 50);
+  const engagementScore = Math.round(redditEngagement + commentEngagement);
+
+  // Calculate relevance score with focus on educational value
+  let relevanceScore = channelData.hasWikipedia ? 70 : 30;
+  relevanceScore += Math.min(academicNews * 10, 30);
+
+  // Calculate overall score with extreme sensitivity
+  let overallScore = Math.round(
     sentimentScore * 0.15 +
-      contentQualityScore * 0.25 +
-      credibilityScore * 0.25 +
-      engagementScore * 0.1 +
-      relevanceScore * 0.15 +
-      appropriatenessScore * 0.1,
-  )
+    contentQualityScore * 0.25 +
+    credibilityScore * 0.25 +
+    engagementScore * 0.1 +
+    relevanceScore * 0.15 +
+    appropriatenessScore * 0.1
+  );
+
+  // Apply harmful content penalty if detected
+  if (hasInappropriateMentions > 5) {
+    overallScore = Math.max(30, overallScore - 50);
+  }
 
   return {
     overallScore,
     metrics: {
       audienceSentiment: {
         score: sentimentScore,
-        description: `Based on comment analysis showing ${channelData.sentimentAnalysis.positive.toFixed(1)}% positive and ${channelData.sentimentAnalysis.negative.toFixed(1)}% negative sentiment.`,
+        description: `Extremely sensitive sentiment analysis shows ${channelData.sentimentAnalysis.positive.toFixed(1)}% positive engagement with ${hasEducationalMentions} educational value mentions.`
       },
       contentQuality: {
         score: contentQualityScore,
-        description: `Based primarily on ${channelData.hasWikipedia ? "presence of Wikipedia page" : "lack of Wikipedia presence (40 point reduction)"} and ${channelData.newsArticles.length} news mentions. Wikipedia presence is a critical indicator of quality content.`,
+        description: `${channelData.hasWikipedia ? 'Wikipedia presence indicates notable content.' : 'Lack of Wikipedia presence (-40 points)'}. ${academicNews} academic/educational news mentions detected.`
       },
       credibility: {
         score: credibilityScore,
-        description: `Based on ${channelData.hasWikipedia ? "presence of" : "lack of"} Wikipedia page and ${channelData.newsArticles.length} news mentions.`,
+        description: `Credibility assessment based on ${channelData.hasWikipedia ? 'verified Wikipedia presence' : 'lack of Wikipedia presence'} and ${channelData.newsArticles.length} news mentions, including ${academicNews} academic references.`
       },
       relevance: {
         score: relevanceScore,
-        description: `Estimated based on Wikipedia presence, news coverage, and community discussions. ${channelData.hasWikipedia ? "Having a Wikipedia page significantly increases relevance score." : "Lack of Wikipedia presence suggests limited relevance in the broader context."}`,
+        description: `Relevance evaluated through educational impact, ${academicNews} academic mentions, and broader influence indicators.`
       },
       appropriateness: {
         score: appropriatenessScore,
-        description: `Default appropriateness score. No detailed content analysis available.`,
+        description: `Content appropriateness score reflects ${hasInappropriateMentions} inappropriate content mentions, with significant penalties applied where detected.`
       },
       engagement: {
         score: engagementScore,
-        description: `Based on ${channelData.redditPosts.length} Reddit discussions and comment activity.`,
-      },
+        description: `Engagement measured through Reddit activity (${channelData.redditPosts.length} posts) and comment interaction patterns.`
+      }
     },
-    analysis: `${channelData.channelTitle} is a YouTube creator with ${channelData.subscriberCount.toLocaleString()} subscribers and ${channelData.videoCount} videos. The channel shows ${overallScore >= 80 ? "a high" : overallScore >= 60 ? "a moderate" : "a relatively low"} level of influence based on available metrics, with particular strengths in ${contentQualityScore > 70 ? "content quality" : credibilityScore > 70 ? "credibility" : engagementScore > 70 ? "audience engagement" : sentimentScore > 70 ? "audience sentiment" : "some areas, though significant improvement is possible"}.
+    analysis: `${channelData.channelTitle} demonstrates ${overallScore >= 95 ? 'exceptional' : overallScore >= 70 ? 'solid' : overallScore >= 50 ? 'moderate' : 'concerning'} influence metrics, with particular emphasis on ${contentQualityScore > 80 ? 'content excellence' : 'areas needing improvement'}. ${channelData.hasWikipedia ? 'The established Wikipedia presence significantly boosts credibility' : 'The lack of Wikipedia presence severely impacts content quality assessment'}.
 
-    ${channelData.hasWikipedia ? "The channel has achieved notable status with Wikipedia presence, which strongly indicates quality content and credibility." : "The channel has not yet achieved Wikipedia notable status, which significantly reduces its content quality score. This suggests substantial room for improvement in content quality and credibility."} The audience appears to be ${sentimentScore > 70 ? "highly positive" : sentimentScore > 50 ? "generally positive" : "somewhat mixed"} based on comment analysis. The channel has ${channelData.newsArticles.length > 10 ? "significant" : channelData.newsArticles.length > 0 ? "some" : "minimal"} coverage in news media and ${channelData.redditPosts.length > 10 ? "strong" : channelData.redditPosts.length > 0 ? "some" : "limited"} community discussions on platforms like Reddit.`,
+    Educational value and content appropriateness analysis reveals ${hasEducationalMentions} learning-related mentions and ${hasInappropriateMentions} concerning content flags. The channel has garnered ${academicNews} academic or educational news mentions, ${academicNews > 3 ? 'indicating strong educational credibility' : 'suggesting room for academic engagement'}.`,
     recommendations: [
-      `${channelData.hasWikipedia ? "Maintain Wikipedia presence by continuing to create notable content" : "Work toward establishing notability for Wikipedia inclusion by creating higher quality, more impactful content - this is critical for improving your content quality score"}`,
-      "Increase media coverage by creating newsworthy content and reaching out to relevant publications",
-      "Engage more actively with audience comments to improve sentiment metrics",
-      "Create more shareable content to increase community discussions on platforms like Reddit",
-    ],
-  }
+      channelData.hasWikipedia ? 
+        "Maintain Wikipedia presence while expanding academic partnerships" : 
+        "Prioritize Wikipedia inclusion through notable, educational content creation",
+      hasEducationalMentions > 5 ?
+        "Leverage existing educational impact for institutional partnerships" :
+        "Increase educational content focus with expert collaborations",
+      hasInappropriateMentions > 0 ?
+        "Address content appropriateness concerns in future content" :
+        "Maintain high content standards while expanding reach",
+      academicNews > 3 ?
+        "Expand academic partnerships and educational initiatives" :
+        "Develop relationships with educational institutions and experts"
+    ]
+  };
 }
 
